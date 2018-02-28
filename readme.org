@@ -1,0 +1,4 @@
+#+title: ...
+
+* reference
+- [[https://jamielinux.com/docs/openssl-certificate-authority/][OpenSSL Certificate Authority]]
