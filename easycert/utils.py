@@ -1,5 +1,6 @@
 import subprocess
 import configparser
+import os
 
 
 def runcommand(command, dump=False, run=True):
@@ -14,20 +15,22 @@ def runcommand(command, dump=False, run=True):
         return command
 
 
-def readconfig(filename):
-    config = configparser.ConfigParser()
-    config.optionxform = lambda option: option.strip()
-    config.read(filename)
-    sections = config.sections()
-    for section in sections:
-        new_section = section.strip()
-        if section == new_section:
+def readconfig(filename, config=None):
+    if not config:
+        config = configparser.ConfigParser()
+        config.optionxform = lambda option: option.strip()
+    if os.path.exists(filename):
+        config.read(filename)
+    else:
+        config.read_string(filename)
+    for name in config.sections():
+        stripname = name.strip()
+        if stripname == name:
             continue
-        items = config.items(section)
-        config.add_section(new_section)
-        for item in items:
-            config.set(new_section, item[0], item[1])
-        config.remove_section(section)
+        config.add_section(stripname)
+        for option, value in config[name].items():
+            config.set(stripname, option, value)
+        config.remove_section(name)
     return config
 
 

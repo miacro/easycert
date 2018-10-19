@@ -18,6 +18,17 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(config["topsecret.server.com"]["Port"], '50022')
         self.assertEqual(config["topsecret.server.com"]["ForwardX11"], 'no')
 
+        with open(testfile, "rt") as stream:
+            content = stream.read()
+        config = utils.readconfig(content)
+        self.assertEqual(config["DEFAULT"]["ServerAliveInterval"], '45')
+        self.assertEqual(config["DEFAULT"]["Compression"], 'yes')
+        self.assertEqual(config["DEFAULT"]["CompressionLevel"], '9')
+        self.assertEqual(config["DEFAULT"]["ForwardX11"], 'yes')
+        self.assertEqual(config["bitbucket.org"]["User"], 'hg')
+        self.assertEqual(config["topsecret.server.com"]["Port"], '50022')
+        self.assertEqual(config["topsecret.server.com"]["ForwardX11"], 'no')
+
     def test_dumpconfig(self):
         config = configparser.ConfigParser()
         config["a"] = {"a": 123, "b": "456"}
