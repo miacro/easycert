@@ -3,16 +3,8 @@ import configparser
 import os
 
 
-def runcommand(command, dump=False, run=True):
-    if run:
-        subprocess.run(command, check=True)
-    if not dump:
-        return command
-
-    if isinstance(command, list) or isinstance(command, tuple):
-        return " ".join(command)
-    else:
-        return command
+def runcommand(command):
+    subprocess.run(command, check=True)
 
 
 def readconfig(filename, config=None):

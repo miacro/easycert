@@ -52,30 +52,32 @@ class Pathname():
 class CA():
     Pathname = Pathname
 
-    def __init__(self,
-                 configfiles=[],
-                 dump_command=False,
-                 dump_config=False,
-                 run_command=True):
-        self.configfiles = []
-        self._dump_command = dump_command
-        self._dump_config = dump_config
-        self._run_command = run_command
+    def __init__(self, configfiles, prefix="pki", isrootca=False):
+        if not configfiles:
+            self.configfiles = []
+        else:
+            self.configfiles = configfiles
         self.configfiles.append(
-            os.path.join(os.path.dirname(__file__), "config", "default.conf"))
+            os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "config",
+                "default.conf"))
 
-    def get_config(self):
-        config = None
+        self.config = None
         for item in self.configfiles:
-            config = utils.readconfig(filename=item, config=config)
-        return config
+            self.config = utils.readconfig(filename=item, config=self.config)
+        self.pkidir = os.path.abspath(
+            os.path.expanduser(os.path.expandvars(prefix)))
+        self.isrootca = isrootca
 
-    def run_command(self, command):
-        if self._dump_command:
-            command_string = utils.runcommand(command, dump=True, run=False)
-            print(command_string)
-        return utils.runcommand(
-            command, dump=self._dump_command, run=self._run_command)
+    def getpath(self, *args):
+        return os.path.join(self.pkidir, *args)
+
+    def runcommand(self, command):
+        if isinstance(command, str):
+            print(command)
+        else:
+            print(" ".join(command))
+        return utils.runcommand(command)
 
     def set_pathname_to_config(self, pathname, config):
         config["CA_default"]["dir"] = pathname.get_prefix(with_infix=True)
