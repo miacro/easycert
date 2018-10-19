@@ -1,4 +1,3 @@
-from .utils import Utils
 from .exception import CAError
 import os
 import tempfile

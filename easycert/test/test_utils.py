@@ -1,26 +1,15 @@
-from easycert import Utils
-import unittest, tempfile
+from easycert import utils
+import unittest
+import os
+import tempfile
+import configparser
 
 
 class UtilsTest(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_read_config(self):
-        content = "[DEFAULT]\n \
-                   ServerAliveInterval = 45\n \
-                   Compression = yes\n \
-                   CompressionLevel = 9\n \
-                   ForwardX11 = yes\n \
-                   [bitbucket.org]\n \
-                   User = hg\n \
-                   [topsecret.server.com]\n \
-                   Port = 50022\n \
-                   ForwardX11 = no"
-        config = Utils.read_config(content=content)
+    def test_readconfig(self):
+        testfile = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "files", "A.conf")
+        config = utils.readconfig(filename=testfile)
         self.assertEqual(config["DEFAULT"]["ServerAliveInterval"], '45')
         self.assertEqual(config["DEFAULT"]["Compression"], 'yes')
         self.assertEqual(config["DEFAULT"]["CompressionLevel"], '9')
@@ -29,17 +18,12 @@ class UtilsTest(unittest.TestCase):
         self.assertEqual(config["topsecret.server.com"]["Port"], '50022')
         self.assertEqual(config["topsecret.server.com"]["ForwardX11"], 'no')
 
-        with tempfile.NamedTemporaryFile(mode="w+t") as temp_file:
-            temp_file.write(content)
-            temp_file.flush()
-            config = Utils.read_config(filename=temp_file.name)
-            self.assertEqual(config["DEFAULT"]["ServerAliveInterval"], '45')
-            self.assertEqual(config["DEFAULT"]["Compression"], 'yes')
-            self.assertEqual(config["DEFAULT"]["CompressionLevel"], '9')
-            self.assertEqual(config["DEFAULT"]["ForwardX11"], 'yes')
-            self.assertEqual(config["bitbucket.org"]["User"], 'hg')
-            self.assertEqual(config["topsecret.server.com"]["Port"], '50022')
-            self.assertEqual(config["topsecret.server.com"]["ForwardX11"], 'no')
-
-        config2 = Utils.read_config(config=config)
-        self.assertIs(config, config2)
+    def test_dumpconfig(self):
+        config = configparser.ConfigParser()
+        config["a"] = {"a": 123, "b": "456"}
+        with tempfile.NamedTemporaryFile(mode="w+t") as stream:
+            utils.dumpconfig(config, stream)
+            stream.flush()
+            config2 = utils.readconfig(filename=stream.name)
+            self.assertEqual(config2["a"]["a"], "123")
+            self.assertEqual(config2["a"]["b"], "456")
